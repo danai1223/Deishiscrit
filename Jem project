@@ -4,8 +4,21 @@ local Window = Rayfield:CreateWindow({
     Name = "Jem script",
     LoadingTitle = "Loading UI...",
     LoadingSubtitle = "by Deishi",
-    ConfigurationSaving = { Enabled = true, FolderName = nil, FileName = "MyUIConfig" },
-    KeySystem = false
+    ConfigurationSaving = {
+        Enabled = true,
+        FolderName = nil,
+        FileName = "MyUIConfig"
+    },
+    KeySystem = false,
+    KeySettings = {
+        Title = "Key System",
+        Subtitle = "Enter Key 1234",
+        Note = "No key required",
+        FileName = "Key",
+        SaveKey = true,
+        GrabKeyFromSite = false,
+        Key = "1234"
+    }
 })
 
 local TabMain = Window:CreateTab("Main", 4483362458)
@@ -15,11 +28,14 @@ TabMain:CreateParagraph({
     Content = [[
 คนเขียนสคริปต์ (Deishi)
 เจ้าของสคริปต์ (Jem)
-ฟังก์ชั่นครบ
+↓
+!!!ฟังชั่นครบ มั้ง
+ใช้ก็ระวังบางที่สคริปต์ไม่ติดนะคับ!!!
 ]]
 })
 
 getgenv().TeleportHeight = 6
+getgenv().AutoTP = false
 
 TabMain:CreateSlider({
     Name = "ปรับค่า(Distance Config)",
@@ -33,8 +49,11 @@ TabMain:CreateSlider({
     end
 })
 
+local UIS = game:GetService("UserInputService")
+
 local function autoFarm(mode)
     local plr = game.Players.LocalPlayer
+
     local function startLoop(char)
         local hrp = char:WaitForChild("HumanoidRootPart")
         task.spawn(function()
@@ -60,8 +79,13 @@ local function autoFarm(mode)
         end)
     end
 
-    if plr.Character then startLoop(plr.Character) end
-    plr.CharacterAdded:Connect(function(char) startLoop(char) end)
+    if plr.Character then
+        startLoop(plr.Character)
+    end
+
+    plr.CharacterAdded:Connect(function(char)
+        startLoop(char)
+    end)
 end
 
 TabMain:CreateToggle({
@@ -71,7 +95,9 @@ TabMain:CreateToggle({
     Callback = function(v)
         getgenv().AutoTPAbove = v
         if v then
-            if not getgenv().TeleportHeight then getgenv().TeleportHeight = 5 end
+            if not getgenv().TeleportHeight then
+                getgenv().TeleportHeight = 5
+            end
             autoFarm("AutoTPAbove")
         end
     end
@@ -84,7 +110,9 @@ TabMain:CreateToggle({
     Callback = function(v)
         getgenv().AutoTPBack = v
         if v then
-            if not getgenv().TeleportHeight then getgenv().TeleportHeight = 5 end
+            if not getgenv().TeleportHeight then
+                getgenv().TeleportHeight = 5
+            end
             autoFarm("AutoTPBack")
         end
     end
@@ -101,24 +129,423 @@ local bringToggle = TabMain:CreateToggle({
                 local plr = game.Players.LocalPlayer
                 local char = plr.Character or plr.CharacterAdded:Wait()
                 local hrp = char:WaitForChild("HumanoidRootPart")
+
                 plr.CharacterAdded:Connect(function(c)
                     char = c
                     hrp = char:WaitForChild("HumanoidRootPart")
                 end)
-                local targetCFrame = CFrame.new(-371.22, 22.63, 182.34, 0.05,0,0.99,0,1,0,-0.99,0,0.05)
+
+                local targetCFrame = CFrame.new(
+                    -371.222748, 22.6332397, 182.345093,
+                    0.0549744181, -5.33845146e-09, 0.998487771,
+                    -1.10184317e-09, 1, 5.4072018e-09,
+                    -0.998487771, -1.39743472e-09, 0.0549744181
+                )
+
                 while getgenv().AutoBringWarp do
                     hrp.CFrame = targetCFrame
+
                     local folder = workspace:FindFirstChild("SpawnedEnemies")
                     if folder then
                         for _, obj in ipairs(folder:GetChildren()) do
                             if obj:IsA("Model") and obj:FindFirstChild("HumanoidRootPart") then
-                                obj.HumanoidRootPart.CFrame = CFrame.new(hrp.Position + hrp.CFrame.LookVector*3)
+                                local enemyHRP = obj.HumanoidRootPart
+                                local offset = hrp.CFrame.LookVector * 3
+                                enemyHRP.CFrame = CFrame.new(hrp.Position + offset)
                             elseif obj:IsA("BasePart") then
-                                obj.CFrame = CFrame.new(hrp.Position + hrp.CFrame.LookVector*3)
+                                local offset = hrp.CFrame.LookVector * 3
+                                obj.CFrame = CFrame.new(hrp.Position + offset)
                             end
                         end
                     end
+
                     task.wait(0.05)
+                end
+            end)
+        end
+    end
+})
+
+local TabMap = Window:CreateTab("Map", 4483362458)
+
+TabMain:CreateParagraph({
+    Title = "ข้อมูลสคริปต์",
+    Content = [[
+    เลือก ออโต้ โหวตแมพตรงนี้ได้เลยอย่าเปิด2อันพร้อมกันไม่งั้นจะบัค
+]]
+})
+
+getgenv().AutoVote = false
+
+local function spamVote()
+    task.spawn(function()
+        while getgenv().AutoVote do
+            pcall(function()
+                local args = {"Belimir"}
+                game:GetService("ReplicatedStorage")
+                    :WaitForChild("WDOReplicatedStorage")
+                    :WaitForChild("Events")
+                    :WaitForChild("mapVote")
+                    :FireServer(unpack(args))
+            end)
+            task.wait(0.1)
+        end
+    end)
+end
+
+TabMap:CreateToggle({
+    Name = "Belimir",
+    CurrentValue = false,
+    Flag = "AutoVoteMap",
+    Callback = function(state)
+        getgenv().AutoVote = state
+        if state then
+            spamVote()
+        end
+    end
+})
+
+getgenv().AutoVote = false
+
+local function spamVote()
+    task.spawn(function()
+        while getgenv().AutoVote do
+            pcall(function()
+                local args = {"Slime Cave"}
+                game:GetService("ReplicatedStorage")
+                    :WaitForChild("WDOReplicatedStorage")
+                    :WaitForChild("Events")
+                    :WaitForChild("mapVote")
+                    :FireServer(unpack(args))
+            end)
+            task.wait(0.1)
+        end
+    end)
+end
+
+TabMap:CreateToggle({
+    Name = "Slime Cave",
+    CurrentValue = false,
+    Flag = "AutoVoteMap",
+    Callback = function(state)
+        getgenv().AutoVote = state
+        if state then
+            spamVote()
+        end
+    end
+})
+
+getgenv().AutoVote = false
+
+local function spamVote()
+    task.spawn(function()
+        while getgenv().AutoVote do
+            pcall(function()
+                local args = {"Bandit Hideout"}
+                game:GetService("ReplicatedStorage")
+                    :WaitForChild("WDOReplicatedStorage")
+                    :WaitForChild("Events")
+                    :WaitForChild("mapVote")
+                    :FireServer(unpack(args))
+            end)
+            task.wait(0.1)
+        end
+    end)
+end
+
+TabMap:CreateToggle({
+    Name = "Bandit Hideout",
+    CurrentValue = false,
+    Flag = "AutoVoteMap",
+    Callback = function(state)
+        getgenv().AutoVote = state
+        if state then
+            spamVote()
+        end
+    end
+})
+
+getgenv().AutoVote = false
+
+local function spamVote()
+    task.spawn(function()
+        while getgenv().AutoVote do
+            pcall(function()
+                local args = {"Mushroom Forest"}
+                game:GetService("ReplicatedStorage")
+                    :WaitForChild("WDOReplicatedStorage")
+                    :WaitForChild("Events")
+                    :WaitForChild("mapVote")
+                    :FireServer(unpack(args))
+            end)
+            task.wait(0.1)
+        end
+    end)
+end
+
+TabMap:CreateToggle({
+    Name = "Mushroom Forest",
+    CurrentValue = false,
+    Flag = "AutoVoteMap",
+    Callback = function(state)
+        getgenv().AutoVote = state
+        if state then
+            spamVote()
+        end
+    end
+})
+
+getgenv().AutoVote = false
+
+local function spamVote()
+    task.spawn(function()
+        while getgenv().AutoVote do
+            pcall(function()
+                local args = {"Courtyard"}
+                game:GetService("ReplicatedStorage")
+                    :WaitForChild("WDOReplicatedStorage")
+                    :WaitForChild("Events")
+                    :WaitForChild("mapVote")
+                    :FireServer(unpack(args))
+            end)
+            task.wait(0.1)
+        end
+    end)
+end
+
+TabMap:CreateToggle({
+    Name = "Courtyard",
+    CurrentValue = false,
+    Flag = "AutoVoteMap",
+    Callback = function(state)
+        getgenv().AutoVote = state
+        if state then
+            spamVote()
+        end
+    end
+})
+
+getgenv().AutoVote = false
+
+local function spamVote()
+    task.spawn(function()
+        while getgenv().AutoVote do
+            pcall(function()
+                local args = {"Overgrown Cavern"}
+                game:GetService("ReplicatedStorage")
+                    :WaitForChild("WDOReplicatedStorage")
+                    :WaitForChild("Events")
+                    :WaitForChild("mapVote")
+                    :FireServer(unpack(args))
+            end)
+            task.wait(0.1)
+        end
+    end)
+end
+
+TabMap:CreateToggle({
+    Name = "Overgrown Cavern",
+    CurrentValue = false,
+    Flag = "AutoVoteMap",
+    Callback = function(state)
+        getgenv().AutoVote = state
+        if state then
+            spamVote()
+        end
+    end
+})
+
+getgenv().AutoVote = false
+
+local function spamVote()
+    task.spawn(function()
+        while getgenv().AutoVote do
+            pcall(function()
+                local args = {"Lyseria Desert"}
+                game:GetService("ReplicatedStorage")
+                    :WaitForChild("WDOReplicatedStorage")
+                    :WaitForChild("Events")
+                    :WaitForChild("mapVote")
+                    :FireServer(unpack(args))
+            end)
+            task.wait(0.1)
+        end
+    end)
+end
+
+TabMap:CreateToggle({
+    Name = "Lyseria Desert",
+    CurrentValue = false,
+    Flag = "AutoVoteMap",
+    Callback = function(state)
+        getgenv().AutoVote = state
+        if state then
+            spamVote()
+        end
+    end
+})
+
+getgenv().AutoVote = false
+
+local function spamVote()
+    task.spawn(function()
+        while getgenv().AutoVote do
+            pcall(function()
+                local args = {"Frozen Lake"}
+                game:GetService("ReplicatedStorage")
+                    :WaitForChild("WDOReplicatedStorage")
+                    :WaitForChild("Events")
+                    :WaitForChild("mapVote")
+                    :FireServer(unpack(args))
+            end)
+            task.wait(0.1)
+        end
+    end)
+end
+
+TabMap:CreateToggle({
+    Name = "Frozen Lake",
+    CurrentValue = false,
+    Flag = "AutoVoteMap",
+    Callback = function(state)
+        getgenv().AutoVote = state
+        if state then
+            spamVote()
+        end
+    end
+})
+
+getgenv().AutoVote = false
+
+local function spamVote()
+    task.spawn(function()
+        while getgenv().AutoVote do
+            pcall(function()
+                local args = {"Skycloud Islands"}
+                game:GetService("ReplicatedStorage")
+                    :WaitForChild("WDOReplicatedStorage")
+                    :WaitForChild("Events")
+                    :WaitForChild("mapVote")
+                    :FireServer(unpack(args))
+            end)
+            task.wait(0.1)
+        end
+    end)
+end
+
+TabMap:CreateToggle({
+    Name = "Skycloud Islands",
+    CurrentValue = false,
+    Flag = "AutoVoteMap",
+    Callback = function(state)
+        getgenv().AutoVote = state
+        if state then
+            spamVote()
+        end
+    end
+})
+
+getgenv().AutoVote = false
+
+local function spamVote()
+    task.spawn(function()
+        while getgenv().AutoVote do
+            pcall(function()
+                local args = {"Alstigar Darkswamp"}
+                game:GetService("ReplicatedStorage")
+                    :WaitForChild("WDOReplicatedStorage")
+                    :WaitForChild("Events")
+                    :WaitForChild("mapVote")
+                    :FireServer(unpack(args))
+            end)
+            task.wait(0.1)
+        end
+    end)
+end
+
+TabMap:CreateToggle({
+    Name = "Alstigar Darkswamp",
+    CurrentValue = false,
+    Flag = "AutoVoteMap",
+    Callback = function(state)
+        getgenv().AutoVote = state
+        if state then
+            spamVote()
+        end
+    end
+})
+
+local TabMini = Window:CreateTab("Mini function", 4483362458)
+
+getgenv().BlockEnemyDamage = false
+local mt = getrawmetatable(game)
+local oldNamecall
+local hooked = false
+
+local function enableHook()
+    if hooked then return end
+    oldNamecall = mt.__namecall
+    setreadonly(mt,false)
+    mt.__namecall = newcclosure(function(self,...)
+        local method = getnamecallmethod()
+        if method == "FireServer" and typeof(self) == "Instance" and self.Name == "enemyDamage" then
+            return nil
+        end
+        return oldNamecall(self,...)
+    end)
+    setreadonly(mt,true)
+    hooked = true
+end
+
+local function disableHook()
+    if not hooked then return end
+    setreadonly(mt,false)
+    mt.__namecall = oldNamecall
+    setreadonly(mt,true)
+    hooked = false
+end
+
+TabMini:CreateToggle({
+    Name = "อมตะ(GODMODE)",
+    CurrentValue = false,
+    Flag = "BlockEnemyDamage",
+    Callback = function(v)
+        getgenv().BlockEnemyDamage = v
+        if v then
+            enableHook()
+            task.spawn(function()
+                while getgenv().BlockEnemyDamage do
+                    for _,r in ipairs(game:GetDescendants()) do
+                        if r:IsA("RemoteEvent") and r.Name == "enemyDamage" then
+                            r.FireServer = r.FireServer
+                        end
+                    end
+                    task.wait(0.5)
+                end
+            end)
+        else
+            disableHook()
+        end
+    end
+})
+    
+getgenv().AutoSetAFK = false
+
+TabMini:CreateToggle({
+    Name = "กันหลุด(ANTI AFK)",
+    CurrentValue = false,
+    Flag = "AutoSetAFK",
+    Callback = function(v)
+        getgenv().AutoSetAFK = v
+        if v then
+            task.spawn(function()
+                local event = game:GetService("ReplicatedStorage"):WaitForChild("WDOReplicatedStorage"):WaitForChild("Events"):WaitForChild("setAFK")
+                while getgenv().AutoSetAFK do
+                    pcall(function()
+                        local args = {false}
+                        event:FireServer(unpack(args))
+                    end)
+                    task.wait(0.5)
                 end
             end)
         end

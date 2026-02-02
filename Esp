@@ -1,3 +1,5 @@
+-- ควายกูรู้ทันแม่งมาส่งสคริปต์กูถือว่ากูแจก ชอต ให้พวกโง่ๆ
+
 repeat task.wait() until game:IsLoaded()
 
 local Players = game:GetService("Players")

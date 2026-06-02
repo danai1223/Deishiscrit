@@ -7,7 +7,7 @@ local Window = Rayfield:CreateWindow({
     ConfigurationSaving = {
         Enabled = true,
         FolderName = nil,
-        FileName = "MyUIConfig"
+        FileName = "Config"
     },
     KeySystem = false,
     KeySettings = {
